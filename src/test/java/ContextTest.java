@@ -57,7 +57,9 @@ public class ContextTest {
     }
     @Test
     public void calculateProNumbs() throws Exception {
+        context.printMatrix();
         context.calculateProNumbs();
+        context.printMatrix();
         Dot[][] _dots = context.dots;
         for (Dot[] dot : _dots) {
             for (Dot dot1 : dot) {

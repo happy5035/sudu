@@ -1,3 +1,5 @@
+import java.util.Collection;
+
 /**
  * Created by yjw on 2017/1/18.
  */
@@ -134,6 +136,14 @@ public class Context {
                     calculateBoxProNumbs(_dot, _dot.box);
                     calculateRowProNumbs(_dot, _dot.row);
                     calculateColumnProNumbs(_dot, _dot.column);
+                    if (_dot.proNumbs.size() == 1) {
+                        int value = (Integer) _dot.proNumbs.iterator().next();
+                        System.out.println("在"+i+","+j+"填入"+ value);
+                        _dot.isCertain = true;
+                        _dot.impsNumbs.add( value);
+                        _dot.proNumbs.remove(value);
+                        matrix[i][j] = value;
+                    }
                 }
             }
         }
