@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 
@@ -6,6 +7,7 @@ import java.util.HashSet;
  */
 public class Box {
     Dot[][] dots = new Dot[3][3];
+    HashSet dotsList = new HashSet();
     int x;
     int y;
     int size = 9;
@@ -32,5 +34,16 @@ public class Box {
         if (value != 0) {
             remainNumbs.remove(value);
         }
+    }
+
+    public int calculateNumOfValue(Integer remainNumb) {
+        int num = 0;
+        for (Object o : dotsList) {
+            Dot _dot = (Dot) o;
+            if (_dot.proNumbs.contains(remainNumb)) {
+                num++;
+            }
+        }
+        return num;
     }
 }

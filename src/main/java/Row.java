@@ -29,4 +29,14 @@ public class Row {
             remainNumbs.remove(value);
         }
     }
+
+    public int calculateNumOfValue(Integer remainNumb) {
+        int num = 0;
+        for (Dot dot : dots) {
+            if (dot.proNumbs.contains(num)) {
+                num++;
+            }
+        }
+        return num;
+    }
 }

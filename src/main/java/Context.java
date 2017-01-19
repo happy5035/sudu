@@ -1,4 +1,6 @@
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 /**
  * Created by yjw on 2017/1/18.
@@ -78,6 +80,7 @@ public class Context {
                 }
 
                 box.dots[i % 3][j % 3] = dots[i][j];
+                box.dotsList.add(dots[i][j]);
                 box.updateRemainNumbs(dots[i][j].value);
             }
         }
@@ -195,14 +198,57 @@ public class Context {
 
     }
 
+    /**
+     * 如果该Dot所在行、列或者Box中存在剩余数字只能在一个Dot中，就可以确认该剩余数字
+     * @param dot
+     * @return
+     */
     private boolean decideCanFillByOnly(Dot dot) {
-        Row row = dot.row;
-        Column column = dot.column;
-        Box box = dot.box;
+        boolean result ;
+        result = decideCanFillByOnlyInBox(dot,dot.box)
+                || decideCanFillByOnlyInRow(dot,dot.row)
+                || decideCanFillByOnlyInColumn(dot,dot.column);
 
+        return result;
+    }
+
+    private boolean decideCanFillByOnlyInColumn(Dot dot, Column column) {
+        HashSet remainNumbs = dot.proNumbs;
+        for (Object remainNumb : remainNumbs) {
+            int num = column.calculateNumOfValue((Integer) remainNumb);
+            if (num == 1)
+                return true;
+        }
         return false;
     }
 
+    private boolean decideCanFillByOnlyInRow(Dot dot, Row row) {
+        HashSet remainNumbs = dot.proNumbs;
+        for (Object remainNumb : remainNumbs) {
+            int num = row.calculateNumOfValue((Integer) remainNumb);
+            if (num == 1)
+                return true;
+        }
+        return false;
+    }
+
+
+    private boolean decideCanFillByOnlyInBox(Dot dot, Box box) {
+        HashSet remainNumbs = dot.proNumbs;
+        for (Object remainNumb : remainNumbs) {
+            int num = box.calculateNumOfValue((Integer) remainNumb);
+            if (num == 1) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 如果肯能数字只剩下一个就可以确定该位置的值
+     * @param dot
+     * @return
+     */
     private boolean decideCanFillBySize(Dot dot) {
         if (dot.proNumbs.size() == 1) {
             return true;
