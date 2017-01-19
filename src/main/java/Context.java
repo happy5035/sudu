@@ -39,7 +39,7 @@ public class Context {
     }
 
 
-    public  Dot[][] preInitDots(int[][] matrix) {
+    private Dot[][] preInitDots(int[][] matrix) {
         Dot[][] dots = new Dot[9][9];
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
@@ -50,9 +50,9 @@ public class Context {
                 }
                 for (int k = 0; k < 9; k++) {
                     if (dot.isCertain) {
-                        dot.impsNumbs.add(k+1);
+                        dot.addImpsNumbs(k + 1);
                     }else {
-                        dot.proNumbs.add(k + 1);
+                        dot.addProNumbs(k+1);
                     }
                 }
                 dots[i][j] = dot;
@@ -63,7 +63,7 @@ public class Context {
 
     }
 
-    public  Box[][] initBox(Dot[][] dots) {
+    private Box[][] initBox(Dot[][] dots) {
         Box[][] boxes = new Box[3][3];
         for (int i = 0; i < 9; i++) {
             for (int j = 0; j < 9; j++) {
@@ -78,18 +78,22 @@ public class Context {
                 }
 
                 box.dots[i % 3][j % 3] = dots[i][j];
+                box.updateRemainNumbs(dots[i][j].value);
             }
         }
         return boxes;
     }
 
-    public  Row[] initRow(Dot[][] dots) {
+    private Row[] initRow(Dot[][] dots) {
         Row[] rows = new Row[9];
         for (int i = 0; i < 9; i++) {
             Row row = new Row();
             rows[i] = row;
             row.row = i;
             System.arraycopy(dots[i], 0, row.dots, 0, 9);
+            for (int j = 0; j < 9; j++) {
+                row.updateRemainNumbs(dots[i][j].value);
+            }
         }
         return rows;
     }
@@ -102,6 +106,7 @@ public class Context {
             column.column = i;
             for (int j = 0; j < 9; j++) {
                 column.dots[j] = dots[j][i];
+                column.updateRemainNumbs(dots[i][j].value);
             }
         }
         return columns;
@@ -136,16 +141,73 @@ public class Context {
                     calculateBoxProNumbs(_dot, _dot.box);
                     calculateRowProNumbs(_dot, _dot.row);
                     calculateColumnProNumbs(_dot, _dot.column);
-                    if (_dot.proNumbs.size() == 1) {
-                        int value = (Integer) _dot.proNumbs.iterator().next();
-                        System.out.println("åœ¨"+i+","+j+"å¡«å…¥"+ value);
-                        _dot.isCertain = true;
-                        _dot.impsNumbs.add( value);
-                        _dot.proNumbs.remove(value);
-                        matrix[i][j] = value;
-                    }
+                    fill(_dot);
                 }
             }
+        }
+    }
+
+    private void fill( Dot _dot) {
+        if (decideCanFill(_dot)) {
+            int value = (Integer) _dot.proNumbs.iterator().next();
+            System.out.println("(" + _dot.x + "," + _dot.y + ")," + value);
+            update(_dot,value);
+        }
+    }
+
+    /**
+     * ¸üÐÂ box£¬column£¬rowÖÐÊ£ÓàÊý×Ö¼¯ºÏ
+     * @param dot
+     * @param value
+     */
+    private void update(Dot dot, int value) {
+        matrix[dot.x][dot.y] = value;
+        updateDot(dot, value);
+        updateBox(dot.box, value);
+        updateRow(dot.row, value);
+        updateColumn(dot.column, value);
+
+    }
+
+    private void updateDot(Dot dot, int value) {
+        dot.isCertain = true;
+        dot.impsNumbs.add(value);
+        dot.proNumbs.remove(value);
+        dot.value = value;
+    }
+
+    private void updateColumn(Column column, int value) {
+        column.updateRemainNumbs(value);
+    }
+
+    private void updateRow(Row row, int value) {
+        row.updateRemainNumbs(value);
+    }
+
+    private void updateBox(Box box, int value) {
+        box.updateRemainNumbs(value);
+    }
+
+    private boolean decideCanFill(Dot dot) {
+        boolean result = decideCanFillBySize(dot) || decideCanFillByOnly(dot);
+        
+        return result;
+
+    }
+
+    private boolean decideCanFillByOnly(Dot dot) {
+        Row row = dot.row;
+        Column column = dot.column;
+        Box box = dot.box;
+
+        return false;
+    }
+
+    private boolean decideCanFillBySize(Dot dot) {
+        if (dot.proNumbs.size() == 1) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -163,32 +225,35 @@ public class Context {
         Dot[][] _dots = box.dots;
         calculateProImpsInDots(dot, _dots);
     }
+
     /**
-     *  æ ¹æ®ç»™å®šdotsæ•°ç»„è®¡ç®—ç»™å®šdotä¸­çš„å¯èƒ½æ•°å€¼
-     * @param dot ç»™å®šdot
-     * @param _dots ç»™å®šdotsæ•°ç»„
+     * ¸ù¾Ý¸ø¶¨dotsÊý×é¼ÆËã¸ø¶¨dotÖÐµÄ¿ÉÄÜÊýÖµ
+     *
+     * @param dot   ¸ø¶¨dot
+     * @param _dots ¸ø¶¨dotsÊý×é
      */
     private void calculateProImpsInDots(Dot dot, Dot[][] _dots) {
-        for (Dot[] _dot : _dots) {
-            calculateProImpsInDots(dot, _dot);
-        }
+        int length = Utils.matrixSize(_dots);
+        Dot[] dots = new Dot[length];
+        Object[] o_dots = Utils.matrix2List(_dots);
+        System.arraycopy(o_dots, 0, dots, 0, length);
+        calculateProImpsInDots(dot,  dots);
     }
 
     /**
-     *  æ ¹æ®ç»™å®šdotsæ•°ç»„è®¡ç®—ç»™å®šdotä¸­çš„å¯èƒ½æ•°å€¼
-     * @param dot ç»™å®šdot
-     * @param _dots ç»™å®šdotsæ•°ç»„
+     *  ¸ù¾Ý¸ø¶¨dotsÊý×é¼ÆËã¸ø¶¨dotÖÐµÄ¿ÉÄÜÊýÖµ
+     * @param dot ¸ø¶¨dot
+     * @param _dots ¸ø¶¨dotsÊý×é
      */
     private void calculateProImpsInDots(Dot dot, Dot[] _dots) {
         for (Dot _dot : _dots) {
             int value = _dot.value;
             if (value != 0) {
-                dot.impsNumbs.add(value);
-                dot.proNumbs.remove(value);
+                dot.addImpsNumbs(value);
+                dot.removeProNumbs(value);
             }
         }
     }
-
 
 
     public  void printMatrix() {

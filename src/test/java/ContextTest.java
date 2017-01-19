@@ -72,6 +72,9 @@ public class ContextTest {
     public void test() {
         context.printMatrix();
         context.calculateProNumbs();
+        context.printMatrix();
         context.printDot(0, 1);
+        context.printBox(0,0);
+        System.out.println(context.boxes[0][0]);
     }
 }

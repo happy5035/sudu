@@ -32,4 +32,16 @@ public class Dot {
                 ", isCertain=" + isCertain+
                 '}';
     }
+
+    public void addImpsNumbs(int i) {
+        impsNumbs.add(i);
+    }
+
+    public void addProNumbs(int i) {
+        proNumbs.add(i);
+    }
+
+    public void removeProNumbs(int value) {
+        proNumbs.remove(value);
+    }
 }
